@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart City - Medidores Inteligentes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #0066cc;
+            --secondary-color: #00aaff;
+            --accent-color: #ff6600;
+            --light-color: #f5f9ff;
+            --dark-color: #333;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f9f9f9;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .logo span {
+            color: var(--accent-color);
+        }
+        
+        nav {
+            background-color: rgba(255, 255, 255, 0.1);
+            margin-top: 1rem;
+            border-radius: 5px;
+        }
+        
+        nav ul {
+            display: flex;
+            justify-content: center;
+            list-style: none;
+            padding: 0.5rem;
+        }
+        
+        nav li {
+            margin: 0 1rem;
+        }
+        
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+        }
+        
+        nav a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 100px auto 2rem;
+            padding: 0 1rem;
+        }
+        
+        section {
+            background: white;
+            border-radius: 10px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        h1, h2, h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 0.5rem;
+        }
+        
+        h2 {
+            font-size: 2rem;
+        }
+        
+        h3 {
+            font-size: 1.5rem;
+            color: var(--secondary-color);
+        }
+        
+        p {
+            margin-bottom: 1rem;
+        }
+        
+        .hero {
+            text-align: center;
+            padding: 3rem 2rem;
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%230066cc"/><path d="M0 0L100 100" stroke="%2300aaff" stroke-width="2"/><path d="M100 0L0 100" stroke="%2300aaff" stroke-width="2"/></svg>');
+            background-size: cover;
+            color: white;
+            border-radius: 10px;
+        }
+        
+        .hero h1 {
+            color: white;
+            border: none;
+            font-size: 3rem;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto 2rem;
+        }
+        
+        .btn {
+            display: inline-block;
+            background-color: var(--accent-color);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: #e55a00;
+            transform: translateY(-3px);
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .feature-card {
+            background: var(--light-color);
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            overflow-x: auto;
+            display: block;
+        }
+        
+        .comparison-table th, .comparison-table td {
+            border: 1px solid #ddd;
+            padding: 0.8rem;
+            text-align: center;
+        }
+        
+        .comparison-table th {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .comparison-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 2rem 0;
+        }
+        
+        .benefits-list {
+            list-style-type: none;
+        }
+        
+        .benefits-list li {
+            margin-bottom: 0.8rem;
+            padding-left: 2rem;
+            position: relative;
+        }
+        
+        .benefits-list li:before {
+            content: "✓";
+            color: var(--accent-color);
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+        
+        .publish-guide {
+            background-color: #e8f4ff;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-top: 2rem;
+        }
+        
+        .publish-guide h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .publish-guide ol {
+            margin-left: 1.5rem;
+        }
+        
+        .publish-guide li {
+            margin-bottom: 0.8rem;
+        }
+        
+        footer {
+            background-color: var(--dark-color);
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+        
+        @media (max-width: 768px) {
+            nav ul {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            nav li {
+                margin: 0.5rem 0;
+            }
+            
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .features {
+                grid-template-columns: 1fr;
+            }
+            
+            .comparison-table {
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">Smart<span>City</span></div>
+        <nav>
+            <ul>
+                <li><a href="#inicio">Inicio</a></li>
+                <li><a href="#nosotros">Quiénes Somos</a></li>
+                <li><a href="#medidores">Medidores</a></li>
+                <li><a href="#beneficios">Beneficios</a></li>
+                <li><a href="#iot">Nb-IoT</a></li>
+                <li><a href="#software">Software</a></li>
+                <li><a href="#publicar">Publicar</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="container">
+        <section id="inicio" class="hero">
+            <h1>UN PASO A LA CIUDAD INTELIGENTE</h1>
+            <p>Nuevas tecnologías a su disposición. IC-RF-Nb-IoT. La nueva era en la provisión y gestión de servicios de agua y energía.</p>
+            <a href="#medidores" class="btn">Descubre más</a>
+        </section>
+
+        <section id="nosotros">
+            <h2>QUIÉNES SOMOS</h2>
+            <h3>DIESEL METAL AMERICA INC</h3>
+            <p>Innovación y simplicidad son el factor principal de nuestra tecnología que busca alcanzar los más altos estándares de calidad en la manufactura con cero defectos y durabilidad, trabajamos para que nuestros productos sobrepasen las expectativas.</p>
+            <p>Mantenemos una comunicación honesta y clara con nuestros asociados, distribuidores y clientes, respondiendo a todos sus requerimientos.</p>
+            
+            <div class="chart-container">
+                <canvas id="qualityChart"></canvas>
+            </div>
+        </section>
+
+        <section id="medidores">
+            <h2>SMART WATER METER Prepago con IC</h2>
+            <div class="features">
+                <div class="feature-card">
+                    <div class="feature-icon">💧</div>
+                    <h3>Tarjeta IC Medidor Inteligente</h3>
+                    <p>El medidor inteligente prepago se activa mediante una tarjeta inteligente IC, el usuario desliza su tarjeta IC en el área de inducción del medidor.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Almacenamiento de Datos</h3>
+                    <p>Almacenamiento de datos de fácil lectura (10 años) y fácil transferencia de datos de un medidor a otro.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3>IC Card Reader & Writer</h3>
+                    <p>El medidor alerta al usuario cuando está por terminar el recurso prepagado. Recarga disponible en puntos de pago autorizados.</p>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <canvas id="meterUsageChart"></canvas>
+            </div>
+        </section>
+
+        <section id="comparison">
+            <h2>INFRAESTRUCTURAS DE MEDICIÓN Y CONTROL</h2>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Característica</th>
+                        <th>Manual</th>
+                        <th>Smart Meter Prepago</th>
+                        <th>Smart Meter Nb IoT</th>
+                        <th>RF, RS485, LoRa, etc.</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Tipo de medidor</td>
+                        <td>Mecánico</td>
+                        <td>Inteligente</td>
+                        <td>Inteligente</td>
+                        <td>Inteligente</td>
+                    </tr>
+                    <tr>
+                        <td>Personal para lecturas</td>
+                        <td>Sí</td>
+                        <td>Tarjeta inteligente</td>
+                        <td>No</td>
+                        <td>No</td>
+                    </tr>
+                    <tr>
+                        <td>Personal para corte de servicios</td>
+                        <td>Sí</td>
+                        <td>Tarjeta inteligente</td>
+                        <td>No</td>
+                        <td>No</td>
+                    </tr>
+                    <tr>
+                        <td>Infraestructura</td>
+                        <td>Sí</td>
+                        <td>No</td>
+                        <td>No</td>
+                        <td>Sí, muy costosa</td>
+                    </tr>
+                    <tr>
+                        <td>Mantenimiento de infraestructura</td>
+                        <td>Sí</td>
+                        <td>No</td>
+                        <td>No</td>
+                        <td>Sí, muy costosa</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section id="beneficios">
+            <h2>BENEFICIOS</h2>
+            <ul class="benefits-list">
+                <li>Reducción de pérdidas o fugas del recurso</li>
+                <li>Eliminación de cartera vencida</li>
+                <li>Pago del servicio anticipadamente</li>
+                <li>Eliminación de costes de lectura, corte y reconexión</li>
+                <li>Sistema de multitarifa</li>
+                <li>No se requiere infraestructura para comunicación</li>
+                <li>El usuario paga lo que consume</li>
+                <li>Reducción de riesgos laborales</li>
+            </ul>
+            
+            <div class="chart-container">
+                <canvas id="savingsChart"></canvas>
+            </div>
+        </section>
+
+        <section id="iot">
+            <h2>Internet de las Cosas: ¿Por Qué Medidores Nb-IoT?</h2>
+            <div class="features">
+                <div class="feature-card">
+                    <div class="feature-icon">🌐</div>
+                    <h3>Cobertura</h3>
+                    <p>Aprovecha la infraestructura de operadoras de internet, permitiendo cobertura amplia incluso en subterráneos.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💰</div>
+                    <h3>Reducción de Costos</h3>
+                    <p>Bajo costo de implementación, mantenimiento y consumo de baterías con vida útil sobre 5 años.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚙️</div>
+                    <h3>Fácil Configuración</h3>
+                    <p>Detección de pérdidas, disminución de cartera vencida y manejo Pre-pago ó Post-pago.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3>Seguridad</h3>
+                    <p>Seguridad en las lecturas, información encriptada y transmisión a través de SIM card en banda segura.</p>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <canvas id="iotAdvantagesChart"></canvas>
+            </div>
+        </section>
+
+        <section id="software">
+            <h2>SMART METER INTEGRATED MANAGEMENT SOFTWARE (S.M.I.M.S.)</h2>
+            <p>Software de gestión que supervisa y controla la operación diaria de los recursos, mejora la eficiencia del servicio y reduce costos de mantenimiento.</p>
+            
+            <h3>Funcionalidades Principales:</h3>
+            <ul class="benefits-list">
+                <li>Múltiples usuarios con diferentes niveles de acceso</li>
+                <li>Fijar tarifas, crear cuentas y segmentar por áreas</li>
+                <li>Abrir y cerrar válvulas remotamente</li>
+                <li>Emitir facturas y reportes personalizados</li>
+                <li>Detección de fallas y alertas</li>
+                <li>Análisis de consumo y detección de fugas</li>
+                <li>Extracción de reportes en Excel</li>
+                <li>Control de flujos de ingresos en tiempo real</li>
+            </ul>
+            
+            <div class="chart-container">
+                <canvas id="softwareChart"></canvas>
+            </div>
+        </section>
+
+        <section id="publicar" class="publish-guide">
+            <h2>Cómo Publicar esta Página en GitHub Pages</h2>
+            <p>Sigue estos pasos para publicar esta página web en GitHub Pages de forma gratuita:</p>
+            
+            <ol>
+                <li>Crea una cuenta en <a href="https://github.com" target="_blank">GitHub</a> si no tienes una</li>
+                <li>Haz clic en "+" en la esquina superior derecha y selecciona "New repository"</li>
+                <li>Nombra tu repositorio: <strong>tu-usuario.github.io</strong> (reemplaza "tu-usuario" con tu nombre de usuario)</li>
+                <li>Selecciona "Public" y haz clic en "Create repository"</li>
+                <li>En tu repositorio, ve a la pestaña "Settings" > "Pages"</li>
+                <li>En "Source", selecciona la rama "main" y la carpeta "/root"</li>
+                <li>Haz clic en "Save"</li>
+                <li>Sube este archivo HTML a tu repositorio (nómbralo "index.html")</li>
+                <li>Tu sitio estará disponible en: <strong>https://tu-usuario.github.io</strong></li>
+            </ol>
+            
+            <p><strong>Nota:</strong> Puede tomar algunos minutos para que tu sitio se active después de subir el archivo.</p>
+        </section>
+    </div>
+
+    <footer>
+        <p>&copy; 2023 Diesel Metal America Inc. - Todos los derechos reservados</p>
+        <p>Smart City Solutions - Medidores Inteligentes de Agua y Energía</p>
+    </footer>
+
+    <script>
+        // Esperar a que el DOM esté completamente cargado
+        document.addEventListener('DOMContentLoaded', function() {
+            // Gráfico de calidad de fabricación
+            const qualityCtx = document.getElementById('qualityChart').getContext('2d');
+            new Chart(qualityCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Eficiencia Energética', 'Durabilidad', 'Precisión', 'Cero Defectos'],
+                    datasets: [{
+                        data: [30, 25, 25, 20],
+                        backgroundColor: ['#0066cc', '#00aaff', '#ff6600', '#00cc99']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Estándares de Calidad en Manufactura'
+                        }
+                    }
+                }
+            });
+
+            // Gráfico de uso de medidores
+            const meterUsageCtx = document.getElementById('meterUsageChart').getContext('2d');
+            new Chart(meterUsageCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Consumo de Agua (m³)',
+                        data: [12, 19, 8, 9, 12, 10],
+                        backgroundColor: '#0066cc'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Consumo Mensual Promedio con Medidores Inteligentes'
+                        }
+                    }
+                }
+            });
+
+            // Gráfico de ahorros
+            const savingsCtx = document.getElementById('savingsChart').getContext('2d');
+            new Chart(savingsCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['Reducción de Pérdidas', 'Ahorro en Personal', 'Eliminación de Cortes', 'Pagos Anticipados', 'Menor Mantenimiento'],
+                    datasets: [{
+                        label: 'Sistema Tradicional',
+                        data: [30, 80, 20, 10, 40],
+                        fill: true,
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgb(255, 99, 132)',
+                        pointBackgroundColor: 'rgb(255, 99, 132)'
+                    }, {
+                        label: 'Sistema Inteligente',
+                        data: [80, 20, 90, 85, 75],
+                        fill: true,
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgb(54, 162, 235)',
+                        pointBackgroundColor: 'rgb(54, 162, 235)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Comparación de Eficiencia: Sistemas Tradicional vs Inteligente'
+                        }
+                    }
+                }
+            });
+
+            // Gráfico de ventajas IoT
+            const iotCtx = document.getElementById('iotAdvantagesChart').getContext('2d');
+            new Chart(iotCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Cobertura', 'Reducción de Costos', 'Facilidad de Configuración', 'Seguridad'],
+                    datasets: [{
+                        data: [35, 30, 20, 15],
+                        backgroundColor: ['#0066cc', '#00aaff', '#ff6600', '#00cc99']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Ventajas de la Tecnología Nb-IoT'
+                        }
+                    }
+                }
+            });
+
+            // Gráfico de software
+            const softwareCtx = document.getElementById('softwareChart').getContext('2d');
+            new Chart(softwareCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+                    datasets: [{
+                        label: 'Operaciones Exitosas',
+                        data: [65, 59, 80, 81, 56, 55, 40],
+                        fill: false,
+                        borderColor: '#0066cc',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Rendimiento Semanal del Software de Gestión'
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
